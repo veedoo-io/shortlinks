@@ -6,8 +6,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 
+/**
+ * @property string short_url
+ * @property string key_url
+ * @property string original_url
+ */
 class Link extends Model
 {
+    use HasFactory;
+
     protected $table = 'links';
 
     protected $fillable = [
@@ -31,6 +38,4 @@ class Link extends Model
 
         return $urlKey;
     }
-
-    use HasFactory;
 }
