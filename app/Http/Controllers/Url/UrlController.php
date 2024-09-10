@@ -36,7 +36,7 @@ class UrlController extends Controller
             ['original_url' => $request->url],
             [
                 'key_url' => $keyUrl = Link::createKeyUrl(),
-                'short_url' => url("/$keyUrl")
+                'short_url' => url("/api/$keyUrl")
             ]
         );
 
