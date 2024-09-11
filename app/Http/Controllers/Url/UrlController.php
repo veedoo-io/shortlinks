@@ -32,11 +32,12 @@ class UrlController extends Controller
      */
     public function create(UrlCreateRequest $request): JsonResponse
     {
-        $link = Link::query()->firstOrCreate(
+        $link = Link::query()->updateOrCreate(
             ['original_url' => $request->url],
             [
                 'key_url' => $keyUrl = Link::createKeyUrl(),
-                'short_url' => url("/api/$keyUrl")
+                'short_url' => url("/api/$keyUrl"),
+                'author_name' => $request->author_name
             ]
         );
 
@@ -44,6 +45,7 @@ class UrlController extends Controller
             'short_url' => $link->short_url,
             'original_url' => $link->original_url,
             'key_url' => $link->key_url,
+            'author_name' => $link->author_name,
         ]);
     }
 }

@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
  * @property string short_url
  * @property string key_url
  * @property string original_url
+ * @property string|null author_name
  */
 class Link extends Model
 {
@@ -21,6 +22,7 @@ class Link extends Model
         'key_url',
         'original_url',
         'short_url',
+        'author_name',
     ];
 
     /**

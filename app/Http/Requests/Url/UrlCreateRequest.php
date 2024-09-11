@@ -6,6 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 /**
  * @property-read string $url
+ * @property-read string|null $author_name
  */
 class UrlCreateRequest extends FormRequest
 {
@@ -26,6 +27,7 @@ class UrlCreateRequest extends FormRequest
     {
         return [
             'url' => ['required', 'string', 'url'],
+            'author_name' => ['nullable', 'string', 'min:1', 'max:255'],
         ];
     }
 }
