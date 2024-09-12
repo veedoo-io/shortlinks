@@ -32,7 +32,7 @@ class UrlController extends Controller
      */
     public function create(UrlCreateRequest $request): JsonResponse
     {
-        $link = Link::query()->updateOrCreate(
+        $link = Link::query()->firstOrCreate(
             ['original_url' => $request->url],
             [
                 'key_url' => $keyUrl = Link::createKeyUrl(),
