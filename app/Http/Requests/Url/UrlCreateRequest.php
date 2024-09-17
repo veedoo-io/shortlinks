@@ -5,8 +5,8 @@ namespace App\Http\Requests\Url;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * @property-read string $url
- * @property-read string|null $author_name
+ * @property-read string url
+ * @property-read string|null author_name
  */
 class UrlCreateRequest extends FormRequest
 {

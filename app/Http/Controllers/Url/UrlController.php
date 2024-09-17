@@ -5,12 +5,23 @@ namespace App\Http\Controllers\Url;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Url\UrlCreateRequest;
 use App\Models\Url\Link;
+use App\Service\Url\LinkService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 
 class UrlController extends Controller
 {
+    private LinkService $linkService;
+
+    /**
+     * @param LinkService $linkService
+     */
+    public function __construct(LinkService $linkService)
+    {
+        $this->linkService = $linkService;
+    }
+
     /**
      * @param string $key_url
      * @return RedirectResponse
@@ -32,20 +43,10 @@ class UrlController extends Controller
      */
     public function create(UrlCreateRequest $request): JsonResponse
     {
-        $link = Link::query()->firstOrCreate(
-            ['original_url' => $request->url],
-            [
-                'key_url' => $keyUrl = Link::createKeyUrl(),
-                'short_url' => url("/$keyUrl"),
-                'author_name' => $request->author_name
-            ]
-        );
+        $link = $this->linkService->firstOrCreateLink($request->url, $request->author_name);
 
-        return $this->sendResponse([
-            'short_url' => $link->short_url,
-            'original_url' => $link->original_url,
-            'key_url' => $link->key_url,
-            'author_name' => $link->author_name,
-        ]);
+        $this->linkService->firstOrCreateLinkCreator($link, $request->author_name ?? $request->ip());
+
+        return $this->sendResponse($link->toArrayResponse());
     }
 }

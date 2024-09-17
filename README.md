@@ -16,10 +16,12 @@
 {
     "success": true,
     "data": {
-        "short_url": "http://localhost/api/eSppNrIw",
+        "short_url": "http://localhost/api/lgvXYK30",
         "original_url": "https://www.google.com",
-        "key_url": "eSppNrIw",
-        "author_name": "laravel"
+        "key_url": "lgvXYK30",
+        "author_name": null,
+        "counter_creators": 0,
+        "created_at": "2024-09-10 07:38:07"
     },
     "message": "ok"
 }
