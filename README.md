@@ -2,6 +2,7 @@
 
 #### Api create short link
 > `FAKE_URL_LENGTH`=`8` - length `key_url`
+> `REDIRECT_URL`=`https://euvsdisinfo.eu` - redirect start page
 
 > `POST` http://localhost/api/url
 ###### `parameters`
