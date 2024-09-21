@@ -34,7 +34,11 @@ class UrlController extends Controller
             abort(404, 'Not Found Link');
         }
 
-        return redirect($link->original_url, Response::HTTP_MOVED_PERMANENTLY);
+        return redirect($link->original_url, Response::HTTP_MOVED_PERMANENTLY, [
+            'Referrer-Policy' => 'unsafe-url',
+            'Location' => $link->original_url,
+            'Referer' => url()->current(),
+        ]);
     }
 
     /**
