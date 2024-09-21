@@ -2,6 +2,7 @@
 
 namespace App\Service\Url;
 
+use App\Helpers\UTM;
 use App\Models\Url\Link;
 use App\Models\Url\LinkCreator;
 
@@ -18,7 +19,7 @@ class LinkService
             ['original_url' => $url],
             [
                 'key_url' => $keyUrl = Link::createKeyUrl(),
-                'short_url' => url("/$keyUrl"),
+                'short_url' => UTM::add(url("/$keyUrl"), $keyUrl),
                 'author_name' => $author_name,
                 'counter_creators' => 0
             ]
