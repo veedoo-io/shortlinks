@@ -5,6 +5,8 @@ namespace App\Models\Url;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
 
 /**
@@ -15,6 +17,7 @@ use Illuminate\Support\Str;
  * @property string|null author_name
  * @property int counter_creators
  * @property Carbon|string|null created_at
+ * @property LinkCreator[]|Collection linkCreators
  */
 class Link extends Model
 {
@@ -34,6 +37,11 @@ class Link extends Model
         'created_at',
         'updated_at',
     ];
+
+    public function linkCreators(): HasMany
+    {
+        return $this->hasMany(LinkCreator::class);
+    }
 
     /**
      * @return string
@@ -63,6 +71,8 @@ class Link extends Model
             'author_name' => $this->author_name,
             'counter_creators' => $this->counter_creators,
             'created_at' => $this->created_at->toDateTimeString(),
+            'exists' => !$this->wasRecentlyCreated,
+            'copy_creators' => $this->linkCreators()->select(['author_name', 'created_at'])->get()->toArray(),
         ];
     }
 }

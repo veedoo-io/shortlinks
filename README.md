@@ -17,12 +17,19 @@
 {
     "success": true,
     "data": {
-        "short_url": "http://localhost/api/lgvXYK30",
-        "original_url": "https://www.google.com",
-        "key_url": "lgvXYK30",
-        "author_name": null,
-        "counter_creators": 0,
-        "created_at": "2024-09-10 07:38:07"
+        "short_url": "http://localhost/KwTgYKUh",
+        "original_url": "https://euvsdisinfo.eu/ua/learn-ua/",
+        "key_url": "KwTgYKUh",
+        "author_name": "mykola",
+        "counter_creators": 1,
+        "created_at": "2024-09-21 14:36:29",
+        "exists": true,
+        "copy_creators": [
+            {
+                "author_name": "roma",
+                "created_at": "2024-09-24 18:11:35"
+            }
+        ]
     },
     "message": "ok"
 }
