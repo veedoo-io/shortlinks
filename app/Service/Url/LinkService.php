@@ -16,10 +16,10 @@ class LinkService
     public function firstOrCreateLink(string $url, ?string $author_name): Link
     {
         return Link::query()->firstOrCreate(
-            ['original_url' => $url],
+            ['original_url' => UTM::add($url)],
             [
                 'key_url' => $keyUrl = Link::createKeyUrl(),
-                'short_url' => UTM::add(url("/$keyUrl"), $keyUrl),
+                'short_url' => url("/$keyUrl"),
                 'author_name' => $author_name,
                 'counter_creators' => 0
             ]

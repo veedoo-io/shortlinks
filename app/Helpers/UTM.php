@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use App\Service\Url\UrlParse;
+
 class UTM
 {
     /**
@@ -9,13 +11,10 @@ class UTM
      * @param string $keyUrl
      * @return string
      */
-    public static function add(string $url, string $keyUrl): string
+    public static function add(string $url): string
     {
-        $utmParams = config('utm.params');
-        $utmParams['utm_content'] = $keyUrl;
+        $url = UrlParse::fromString($url);
 
-        $urlParamsUtm =  (bool)config('utm.include') ? '?' . http_build_query($utmParams) : '';
-
-        return $url . $urlParamsUtm;
+        return $url->createUrl()->withUTM()->getUrlToString();
     }
 }

@@ -4,9 +4,8 @@ return [
     'include' => env('UTM_INCLUDE', false),
 
     'params' => [
-        'utm_source' => env('UTM_SOURCE', 'google'),
-        'utm_medium' => env('UTM_MEDIUM', 'referral'),
+        'utm_source' => env('UTM_SOURCE', 'euvsd.info'),
+        'utm_medium' => 'auto',
         'utm_campaign' => env('UTM_CAMPAIGN', 'euvsd_info'),
-        'utm_content' => 'auto',
     ]
 ];
