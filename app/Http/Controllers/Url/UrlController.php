@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Url;
 
+use App\Helpers\UTM;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Url\UrlCreateRequest;
 use App\Models\Url\Link;
@@ -34,11 +35,7 @@ class UrlController extends Controller
             abort(404, 'Not Found Link');
         }
 
-        return redirect($link->original_url, Response::HTTP_MOVED_PERMANENTLY, [
-            'Referrer-Policy' => 'unsafe-url',
-            'Location' => $link->original_url,
-            'Referer' => url()->current(),
-        ]);
+        return redirect(UTM::add($link->original_url), Response::HTTP_MOVED_PERMANENTLY);
     }
 
     /**

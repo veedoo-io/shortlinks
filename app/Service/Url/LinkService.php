@@ -2,7 +2,6 @@
 
 namespace App\Service\Url;
 
-use App\Helpers\UTM;
 use App\Models\Url\Link;
 use App\Models\Url\LinkCreator;
 
@@ -16,7 +15,7 @@ class LinkService
     public function firstOrCreateLink(string $url, ?string $author_name): Link
     {
         return Link::query()->firstOrCreate(
-            ['original_url' => UTM::add($url)],
+            ['original_url' => $url],
             [
                 'key_url' => $keyUrl = Link::createKeyUrl(),
                 'short_url' => url("/$keyUrl"),
