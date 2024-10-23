@@ -3,3 +3,6 @@
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', env('REDIRECT_URL', 'https://euvsdisinfo.eu'), 301);
+
+Route::get('/gpt/create', [\App\Http\Controllers\GPT\GPTController::class, 'index'])->name('gpt.index');
+Route::post('/gpt/create', [\App\Http\Controllers\GPT\GPTController::class, 'create'])->name('gpt.create');
