@@ -35,10 +35,6 @@
         <form action="{{ route('gpt.create') }}" method="POST">
             @csrf
             <div class="mb-2">
-                <label for="textCreate" class="form-label">api Key</label>
-                <input type="text" name="apiKey" class="form-control" placeholder="api Key" autofocus>
-            </div>
-            <div class="mb-2">
                 <label for="textAudio" class="form-label">text Audio</label>
                 <input type="text" name="textAudio" class="form-control" placeholder="text Audio">
             </div>

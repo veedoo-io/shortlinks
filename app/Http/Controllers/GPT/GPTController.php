@@ -18,7 +18,7 @@ class GPTController
 
     public function create(Request $request)
     {
-        $apiKey = $request->apiKey ?? (string)env('API_KEY_OPENAI');
+        $apiKey = (string)env('API_KEY_OPENAI');
         $client = OpenAI::client($apiKey);
 
         $result = $client->audio()->speech([
