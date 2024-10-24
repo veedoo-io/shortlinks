@@ -31,12 +31,13 @@
     </style>
 </head>
 <body class="min-vh-100 align-content-center">
-    <div class="container center">
+
+    <div class="container center mt-5">
         <form action="{{ route('gpt.create') }}" method="POST">
             @csrf
             <div class="mb-2">
                 <label for="textAudio" class="form-label">text Audio</label>
-                <input type="text" name="textAudio" class="form-control" placeholder="text Audio">
+                <textarea type="text" name="textAudio" class="form-control" rows="5" placeholder="text Audio" oninput="auto_grow(this)"></textarea>
             </div>
             <div class="mb-2">
                 <label for="voice" class="form-label">Voice options</label>
@@ -49,16 +50,22 @@
                     <option name="shimmer">shimmer</option>
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary mb-4">Submit</button>
         </form>
         <div>
             @php $audioList = \Illuminate\Support\Facades\Storage::disk('public')->files('audio'); sort($audioList); @endphp
             @foreach($audioList as $audio)
-                <figcaption>{{ $audio }}</figcaption>
+                <figcaption class="mt-2">{{ $audio }}</figcaption>
                 <audio controls src="{{ Storage::disk('public')->url($audio) }}"></audio>
             @endforeach
 
         </div>
     </div>
+<script>
+    function auto_grow(element) {
+        element.style.height = "150px";
+        element.style.height = (element.scrollHeight) + "px";
+    }
+</script>
 </body>
 </html>
