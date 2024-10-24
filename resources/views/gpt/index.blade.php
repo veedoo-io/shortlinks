@@ -53,7 +53,7 @@
             <button type="submit" class="btn btn-primary mb-4">Submit</button>
         </form>
         <div>
-            @php $audioList = \Illuminate\Support\Facades\Storage::disk('public')->files('audio'); sort($audioList); @endphp
+            @php $audioList = \Illuminate\Support\Facades\Storage::disk('public')->files('audio'); rsort($audioList); @endphp
             @foreach($audioList as $audio)
                 <figcaption class="mt-2">{{ $audio }}</figcaption>
                 <audio controls src="{{ Storage::disk('public')->url($audio) }}"></audio>
