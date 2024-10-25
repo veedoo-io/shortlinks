@@ -14,14 +14,18 @@ class GPTController
 {
     public function index(Request $request)
     {
-        $this->checkAuth($request);
+        if (!$this->checkAuth($request)) {
+            return redirect()->route('gpt.auth.index');
+        }
 
         return view('gpt.index');
     }
 
     public function create(Request $request)
     {
-        $this->checkAuth($request);
+        if (!$this->checkAuth($request)) {
+            return redirect()->route('gpt.auth.index');
+        }
 
         $apiKey = (string)env('API_KEY_OPENAI');
         $client = OpenAI::client($apiKey);
@@ -40,13 +44,9 @@ class GPTController
         return redirect()->back();
     }
 
-    private function checkAuth(Request $request)
+    private function checkAuth(Request $request): bool
     {
-        if ((bool)$request->session()->get('authenticated', false) === false) {
-            return redirect()->route('gpt.auth.index');
-        }
-
-        return true;
+        return (bool)$request->session()->get('authenticated', false) !== false;
     }
 
     public function auth(Request $request)
