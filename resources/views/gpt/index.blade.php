@@ -56,7 +56,7 @@
             @php $audioList = \Illuminate\Support\Facades\Storage::disk('public')->files('audio'); rsort($audioList); @endphp
             @foreach($audioList as $audio)
                 <figcaption class="mt-2">{{ $audio }}</figcaption>
-                <audio controls src="{{ Storage::disk('public')->url($audio) }}"></audio>
+                <audio controls src="{{ url("/storage/$audio") }}"></audio>
             @endforeach
 
         </div>
