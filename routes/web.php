@@ -9,3 +9,6 @@ Route::post('/', [\App\Http\Controllers\GPT\GPTController::class, 'create'])->na
 
 Route::view('/gpt/auth', 'gpt.auth.index')->name('gpt.auth.index');
 Route::post('/gpt/auth', [\App\Http\Controllers\GPT\GPTController::class, 'auth'])->name('gpt.auth.save');
+
+Route::get('/beyond', [\App\Http\Controllers\Beyond\BeyondAudioController::class, 'index'])->name('beyond.index');
+Route::post('/beyond/download', [\App\Http\Controllers\Beyond\BeyondAudioController::class, 'downloadAudioByProject'])->name('beyond.downloadAudioByProject');
