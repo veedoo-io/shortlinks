@@ -27,14 +27,21 @@ class GPTController
             return redirect()->route('gpt.auth.index');
         }
 
-        $apiKey = (string)env('API_KEY_OPENAI');
-        $client = OpenAI::client($apiKey);
+        $textAudio = $request->textAudio;
 
-        $result = $client->audio()->speech([
-            'model' => 'tts-1',
-            'input' => $request->textAudio ?? 'hello, world!',
-            'voice' => $request->voice ?? 'alloy',
-        ]);
+        $result = '';
+        for ($offset =0; $offset <= (strlen($textAudio)+4096); $offset += 4096) {
+            $apiKey = (string)env('API_KEY_OPENAI');
+            $client = OpenAI::client($apiKey);
+
+            if (mb_substr($textAudio, $offset, 4096) !== ''){
+                $result .= $client->audio()->speech([
+                    'model' => 'tts-1',
+                    'input' => mb_substr($textAudio, $offset, 4096) ?? 'hello, world!',
+                    'voice' => $request->voice ?? 'alloy',
+                ]);
+            }
+        }
 
         $nameRandom = Str::random();
         $time = Carbon::now()->toDateTimeString();
