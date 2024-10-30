@@ -64,8 +64,6 @@ class BeyondAudioController
 
             $content = json_decode($response->getBody()->getContents(), true);
 
-
-
             foreach ($content as $item) {
                 if (!isset($item['audio'][1])){
                     continue;
@@ -78,7 +76,7 @@ class BeyondAudioController
                 $result = Storage::disk('public')->put("beyond/{$project['id']}/{$item['source_id']}/{$item['id']}.mp3", $responseAudio);
 
                 $result = json_encode($result);
-                echo "{$item['id']} $result";
+                echo "audio: {$item['id']}|Post: {$item['source_id']}|Success: $result <br>";
             }
         }
     }
