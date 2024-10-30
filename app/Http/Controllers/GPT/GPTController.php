@@ -12,6 +12,7 @@ use OpenAI;
 
 class GPTController
 {
+
     public function index(Request $request)
     {
         if (!$this->checkAuth($request)) {
@@ -23,6 +24,8 @@ class GPTController
 
     public function create(Request $request)
     {
+        set_time_limit(120);
+
         if (!$this->checkAuth($request)) {
             return redirect()->route('gpt.auth.index');
         }
