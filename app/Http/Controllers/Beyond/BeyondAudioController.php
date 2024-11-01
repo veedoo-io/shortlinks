@@ -53,11 +53,14 @@ class BeyondAudioController
      */
     public function downloadAudioByProject(Request $request)
     {
+        set_time_limit(300);
         $projectId = $request->input('projectId');
         $project = $this->findProject($projectId);
         if (empty($project)) {
             throw new NotFoundHttpException('Project not found');
         }
+
+        echo "<h2>{$project['name']}</h2><br>";
 
         for($i=0; $i<500; $i+=100) {
             $response = $this->loadContents($projectId, $i);
@@ -66,17 +69,19 @@ class BeyondAudioController
 
             foreach ($content as $item) {
                 if (!isset($item['audio'][1])){
+                    dump($item);
                     continue;
                 }
 
-                $urlAudio = $item['audio'][1]['url'];
+                $responseAudio = $this->client->get($item['audio'][1]['url'])->getBody()->getContents();
 
-                $responseAudio = $this->client->get($urlAudio)->getBody()->getContents();
+                $path = "beyond/{$project['id']}/{$item['source_id']}.mp3";
 
-                $result = Storage::disk('public')->put("beyond/{$project['id']}/{$item['source_id']}/{$item['id']}.mp3", $responseAudio);
+                $result = Storage::disk('spaces')->put($path, $responseAudio);
 
                 $result = json_encode($result);
-                echo "audio: {$item['id']}|Post: {$item['source_id']}|Success: $result <br>";
+
+                echo "audio: {$item['id']}|Post: {$item['source_id']}|Path: {$path} |Success: $result <br>";
             }
         }
     }
