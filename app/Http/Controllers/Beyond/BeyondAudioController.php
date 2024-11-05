@@ -13,7 +13,8 @@ class BeyondAudioController
 {
     private Client $client;
 
-    private $number = 1;
+    private int $number = 1;
+    private string $disk = 'spaces';
 
     public function __construct()
     {
@@ -63,7 +64,7 @@ class BeyondAudioController
             throw new NotFoundHttpException('Project not found');
         }
 
-        $listFiles = Storage::disk('public')->allFiles("beyond/{$project['id']}");
+        $listFiles = Storage::disk($this->disk)->allFiles("beyond/{$project['id']}");
 
         $contents = $this->loadAllContent($projectId);
 
@@ -109,7 +110,7 @@ class BeyondAudioController
     {
         $responseAudio = $this->client->get($url)->getBody()->getContents();
 
-        return Storage::disk('spaces')->put($path, $responseAudio);
+        return Storage::disk($this->disk)->put($path, $responseAudio);
     }
 
     private function loadAllContent(int $projectId): Collection
