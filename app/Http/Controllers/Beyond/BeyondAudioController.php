@@ -5,12 +5,15 @@ namespace App\Http\Controllers\Beyond;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class BeyondAudioController
 {
     private Client $client;
+
+    private $number = 1;
 
     public function __construct()
     {
@@ -41,7 +44,7 @@ class BeyondAudioController
         return $lists;
     }
 
-    private function findProject($projectId)
+    private function findProject(int $projectId)
     {
         $lists = $this->getListProject();
 
@@ -54,49 +57,88 @@ class BeyondAudioController
     public function downloadAudioByProject(Request $request)
     {
         set_time_limit(300);
-        $projectId = $request->input('projectId');
+        $projectId = (int)$request->input('projectId');
         $project = $this->findProject($projectId);
         if (empty($project)) {
             throw new NotFoundHttpException('Project not found');
         }
 
-        echo "<h2>{$project['name']}</h2><br>";
+        $listFiles = Storage::disk('public')->allFiles("beyond/{$project['id']}");
 
-        for($i=0; $i<500; $i+=100) {
-            $response = $this->loadContents($projectId, $i);
+        $contents = $this->loadAllContent($projectId);
 
-            $content = json_decode($response->getBody()->getContents(), true);
+        $totalStorage = count($listFiles);
+        $totalContents = count($contents);
 
-            foreach ($content as $item) {
-                if (!isset($item['audio'][1])){
-                    dump($item);
+        echo "<h2>{$project['name']}</h2>";
+        echo "<h2>Total in Storage: {$totalStorage}</h2>";
+        echo "<h2>Total Contens: {$totalContents}</h2>";
+
+        $contents->chunk(10)->each(function($chunk) use ($project, $listFiles) {
+            foreach ($chunk as $item) {
+                $path = "beyond/{$project['id']}/{$item['source_id']}.mp3";
+
+                if (!isset($item['audio'][1])) {
+                    echo "{$this->number}) audio: {$item['id']} |Post: {$item['source_id']} |Path: {$path} |Success: FALSE |Info: Missing record audio<br>";
+                    $this->number++;
                     continue;
                 }
 
-                $responseAudio = $this->client->get($item['audio'][1]['url'])->getBody()->getContents();
+                if (in_array($path, $listFiles)) {
+                    echo "{$this->number}) audio: {$item['id']} |Post: {$item['source_id']} |Path: {$path} |Success: true |Info: already in storage <br>";
+                    $this->number++;
+                    continue;
+                }
 
-                $path = "beyond/{$project['id']}/{$item['source_id']}.mp3";
+                $result = json_encode($this->loadAndStoreByUrl($item['audio'][1]['url'], $path));
 
-                $result = Storage::disk('spaces')->put($path, $responseAudio);
-
-                $result = json_encode($result);
-
-                echo "audio: {$item['id']}|Post: {$item['source_id']}|Path: {$path} |Success: $result <br>";
+                echo "{$this->number}) audio: {$item['id']} |Post: {$item['source_id']} |Path: {$path} |Success: {$result} <br>";
+                $this->number++;
             }
-        }
+            usleep(200000);//0.2 second
+        });
     }
 
-    private function loadContents($projectId, $offset)
+    /**
+     * @param string $url
+     * @param string $path
+     * @return bool
+     * @throws GuzzleException
+     */
+    private function loadAndStoreByUrl(string $url, string $path): bool
     {
-        return $this->client->request(
-            'GET',
+        $responseAudio = $this->client->get($url)->getBody()->getContents();
+
+        return Storage::disk('spaces')->put($path, $responseAudio);
+    }
+
+    private function loadAllContent(int $projectId): Collection
+    {
+        $offset = 0;
+        $contents = collect();
+        do {
+            $loadContents = $this->loadContents($projectId, $offset);
+
+            $contents = $contents->merge($loadContents);
+
+            $offset += 100;
+        } while (count($loadContents) !== 0);
+
+        return $contents;
+    }
+
+    private function loadContents(int $projectId, int $offset, int $limit = 50): array
+    {
+        $response = $this->client->get(
             "https://api.beyondwords.io/v1/projects/{$projectId}/content", [
             'form_params' => [
                 'pagination' => [
-                    'limit' => 50,
-                    'offset' => $offset,
+                    'limit' => $limit,
+                    'offset' => $offset
                 ]
             ]
         ]);
+
+        return json_decode($response->getBody()->getContents(), true);
     }
 }
