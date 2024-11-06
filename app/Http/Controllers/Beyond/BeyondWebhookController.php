@@ -19,6 +19,7 @@ class BeyondWebhookController extends Controller
     public function create(Request $request, int $projectId)
     {
         Log::alert($request, [
+            'header' => $request->header('Authorization'),
             'path'  => $request->path(),
             'projectId' => $projectId
         ]);
