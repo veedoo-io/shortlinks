@@ -118,17 +118,17 @@ class BeyondAudioController
         $offset = 0;
         $contents = collect();
         do {
-            $loadContents = $this->loadContents($projectId, $offset);
+            $loadContents = $this->loadContents($projectId, $offset, $limit = 50);
 
             $contents = $contents->merge($loadContents);
 
-            $offset += 100;
+            $offset += $limit;
         } while (count($loadContents) !== 0);
 
         return $contents;
     }
 
-    private function loadContents(int $projectId, int $offset, int $limit = 50): array
+    private function loadContents(int $projectId, int $offset, int $limit): array
     {
         $response = $this->client->get(
             "https://api.beyondwords.io/v1/projects/{$projectId}/content", [
