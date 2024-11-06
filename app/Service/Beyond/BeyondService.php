@@ -5,6 +5,7 @@ namespace App\Service\Beyond;
 use GuzzleHttp\Client;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -53,7 +54,7 @@ class BeyondService
         return $project->first();
     }
 
-    public function loadAllFiles(string $path)
+    public function loadAllFiles(string $path): Collection
     {
         return collect($this->disk->allFiles($path));
     }
@@ -62,7 +63,7 @@ class BeyondService
      * @param int $projectId
      * @return void
      */
-    public function downloadAudioByProject(int $projectId)
+    public function downloadAudioByProject(int $projectId): void
     {
         $project = $this->findProjectOrFail($projectId);
 
@@ -75,27 +76,57 @@ class BeyondService
         echo "<h2>Total Contens: {$contents->count()}</h2>";
 
         $contents->chunk(10)->each(function($chunk) use ($project, $listFiles) {
-            foreach ($chunk as $item) {
-                $path = "beyond/{$project['id']}/{$item['source_id']}.mp3";
-                $info = "{$this->number}) audio: {$item['id']} |Post: {$item['source_id']} |Path: {$path} |Success:";
+            foreach ($chunk as $content) {
+                $path = $this->pathAudio($project['id'], $content['source_id']);
+                $info = "{$this->number}) audio: {$content['id']} |Post: {$content['source_id']} |Path: {$path} |Success:";
                 $this->number++;
 
-                if (!isset($item['audio'][1])) {
+                if (!isset($content['audio'][1])) {
                     echo "$info FALSE |Info: Missing record audio<br>";
                     continue;
                 }
 
                 if (in_array($path, $listFiles->toArray())) {
-                    echo "$info true |Info: already in storage <br>";
+                    echo  "$info true |Info: already in storage <br>";
                     continue;
                 }
 
-                $result = json_encode($this->loadAndStoreByUrl($item['audio'][1]['url'], $path));
+                $result = json_encode($this->loadAndStoreByUrl($content['audio'][1]['url'], $path));
 
                 echo "$info {$result} <br>";
             }
             usleep(200000);//0.2 second
         });
+    }
+
+    private function pathAudio(int $projectId, $source_id): string
+    {
+        return "beyond/{$projectId}/{$source_id}.mp3";
+    }
+
+    public function downloadAudioWithWebhook(int $projectId, array $content): void
+    {
+        if ($content['action_type'] !== 'audio.updated') {
+            Log::channel('webhook-beyond-error')->critical("Media not downloaded: action_type={$content['action_type']}");
+            throw new NotFoundHttpException("Media not downloaded: action_type={$content['action_type']}");
+        }
+
+        $project = $this->findProjectOrFail($projectId);
+
+        $path = $this->pathAudio($project['id'], $content['source_id']);
+        $info = "{$this->number}) projectId:{$project['id']} | audio: {$content['id']} |Post: {$content['source_id']} |Path: {$path} |Success:";
+
+        $audio = collect($content['media'])->where('content_type', 'mp3');
+
+        if ($audio->isEmpty()) {
+            $info .= " FALSE";
+            Log::channel('webhook-beyond-error')->critical("Media not found: $info");
+            throw new NotFoundHttpException('Media not found');
+        }
+
+        $result = json_encode($this->loadAndStoreByUrl($audio->first()['url'], $path));
+
+        Log::channel('webhook-beyond')->info($info . $result);
     }
 
     /**

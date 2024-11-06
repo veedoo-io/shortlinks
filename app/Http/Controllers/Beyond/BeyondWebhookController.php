@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Beyond;
 
 use App\Http\Controllers\Controller;
 use App\Service\Beyond\BeyondService;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -16,13 +18,24 @@ class BeyondWebhookController extends Controller
         $this->beyondService = $beyondService;
     }
 
-    public function create(Request $request, int $projectId)
+    /**
+     * @throws AuthenticationException
+     */
+    public function create(Request $request, int $projectId): JsonResponse
     {
-        Log::alert($request, [
-            'header' => $request->header('Authorization'),
-            'path'  => $request->path(),
+        Log::channel('webhook-beyond')->info('Webhook Created', [
+            'source_id' => $request->input('source_id'),
+            'action_type'  => $request->input('action_type'),
             'projectId' => $projectId
         ]);
+
+        $token = env('BEARER_TOKEN');
+
+        if ($request->header('Authorization') !== "Bearer $token") {
+            throw new AuthenticationException();
+        }
+
+        $this->beyondService->downloadAudioWithWebhook($projectId, $request->all());
 
         return $this->sendResponse();
     }
