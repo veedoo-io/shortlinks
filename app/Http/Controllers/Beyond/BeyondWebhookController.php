@@ -16,11 +16,11 @@ class BeyondWebhookController extends Controller
         $this->beyondService = $beyondService;
     }
 
-    public function create(Request $request)
+    public function create(Request $request, int $projectId)
     {
         Log::alert($request, [
-            'query' => $request->all(),
             'path'  => $request->path(),
+            'projectId' => $projectId
         ]);
 
         return $this->sendResponse();
