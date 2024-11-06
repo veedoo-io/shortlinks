@@ -4,7 +4,8 @@ namespace App\Http\Controllers\Beyond;
 
 use App\Http\Controllers\Controller;
 use App\Service\Beyond\BeyondService;
-use GuzzleHttp\Client;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class BeyondWebhookController extends Controller
 {
@@ -12,12 +13,16 @@ class BeyondWebhookController extends Controller
 
     public function __construct(BeyondService $beyondService)
     {
-
         $this->beyondService = $beyondService;
     }
 
-    public function create()
+    public function create(Request $request)
     {
+        Log::alert($request, [
+            'query' => $request->all(),
+            'path'  => $request->path(),
+        ]);
+
         return $this->sendResponse();
     }
 }
