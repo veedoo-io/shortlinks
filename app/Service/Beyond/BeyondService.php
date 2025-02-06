@@ -99,22 +99,22 @@ class BeyondService
         });
     }
 
-    private function pathAudio(int $projectId, $source_id): string
+    private function pathAudio(int $projectId, $external_id): string
     {
-        return "beyond/{$projectId}/{$source_id}.mp3";
+        return "beyond/{$projectId}/{$external_id}.mp3";
     }
 
     public function downloadAudioWithWebhook(int $projectId, array $content): void
     {
-        if ($content['action_type'] !== 'audio.updated') {
+        if ($content['action_type'] !== 'audio.updated' && $content['action_type'] !== 'audio.error') {
             Log::channel('webhook-beyond-error')->critical("Media not downloaded: action_type={$content['action_type']}");
             throw new NotFoundHttpException("Media not downloaded: action_type={$content['action_type']}");
         }
 
         $project = $this->findProjectOrFail($projectId);
 
-        $path = $this->pathAudio($project['id'], $content['source_id']);
-        $info = "{$this->number}) projectId:{$project['id']} | audio: {$content['id']} |Post: {$content['source_id']} |Path: {$path} |Success:";
+        $path = $this->pathAudio($project['id'], $content['external_id']);
+        $info = "{$this->number}) projectId:{$project['id']} | audio: {$content['id']} |Post: {$content['external_id']} |Path: {$path} |Success:";
 
         $audio = collect($content['media'])->where('content_type', 'mp3');
 
