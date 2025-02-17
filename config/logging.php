@@ -64,6 +64,18 @@ return [
             'level' => env('LOG_LEVEL', 'debug'),
             'replace_placeholders' => true,
         ],
+        'webhook-beyond' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/webhook-beyond.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+        'webhook-beyond-error' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/webhook-beyond-error.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
 
         'daily' => [
             'driver' => 'daily',

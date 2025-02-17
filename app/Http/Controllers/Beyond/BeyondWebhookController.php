@@ -24,7 +24,7 @@ class BeyondWebhookController extends Controller
     public function create(Request $request, int $projectId): JsonResponse
     {
         Log::channel('webhook-beyond')->info('Webhook Created', [
-            'source_id' => $request->input('source_id'),
+            'external_id' => $request->input('external_id'),
             'action_type'  => $request->input('action_type'),
             'projectId' => $projectId
         ]);
