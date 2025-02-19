@@ -15,7 +15,7 @@
             width: 50%;
         }
         .min-vh-100 {
-            height: 100vh;
+            height: 98vh;
         }
         .align-content-center {
             align-content: center;
@@ -24,9 +24,20 @@
             width: 256px;
             height: 158px;
         }
+        .status {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 10%;
+            text-align: center;
+        }
+        .status span {
+            color: limegreen;
+        }
     </style>
 </head>
 <body class="min-vh-100 align-content-center">
-    <img src="favicon.ico" alt="favicon" class="center img">
+    <img src="../favicon.ico" alt="favicon" class="center img">
+    <h1 class="status">Status <span>Active</span></h1>
 </body>
 </html>
