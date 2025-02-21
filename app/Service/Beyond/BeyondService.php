@@ -103,8 +103,6 @@ class BeyondService
     {
         $project = $this->findProjectOrFail($projectId);
 
-        $listFiles = $this->loadAllFiles("beyond/{$projectId}");
-
         $content = $this->loadContentByPostOrFail($projectId, $postId);
 
         if ($postId === (int)$content['source_id']) {
@@ -123,15 +121,13 @@ class BeyondService
                 return false;
             }
 
-            if (in_array($path, $listFiles->toArray())) {
+            if ($this->disk->exists($path)) {
                 Log::channel('sync-beyond')->critical('Sync Error', [
                     ...$info,
                     'info' => 'already in storage',
                 ]);
                 return true;
             }
-
-
 
             $result = $this->loadAndStoreByUrl($content['audio'][1]['url'], $path);
 
