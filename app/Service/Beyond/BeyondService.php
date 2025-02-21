@@ -99,6 +99,60 @@ class BeyondService
         });
     }
 
+    public function syncAudioByPostId(int $projectId, int $postId): bool
+    {
+        $project = $this->findProjectOrFail($projectId);
+
+        $listFiles = $this->loadAllFiles("beyond/{$projectId}");
+
+        $content = $this->loadContentByPostOrFail($projectId, $postId);
+
+        if ($postId === (int)$content['source_id']) {
+            $path = $this->pathAudio($project['id'], $content['source_id']);
+            $info = [
+                'audio' => $content['id'],
+                'projectId' => $projectId,
+                'postId'  => $postId,
+            ];
+
+            if (!isset($content['audio'][1])) {
+                Log::channel('sync-beyond')->critical('Sync Error', [
+                    ...$info,
+                    'info' => 'Missing record audio',
+                ]);
+                return false;
+            }
+
+            if (in_array($path, $listFiles->toArray())) {
+                Log::channel('sync-beyond')->critical('Sync Error', [
+                    ...$info,
+                    'info' => 'already in storage',
+                ]);
+                return true;
+            }
+
+
+
+            $result = $this->loadAndStoreByUrl($content['audio'][1]['url'], $path);
+
+            if ($result) {
+                Log::channel('sync-beyond')->info('Sync Success', [
+                    ...$info,
+                    'info' => 'Success',
+                ]);
+            } else {
+                Log::channel('sync-beyond')->critical('Sync Failure', [
+                    ...$info,
+                    'info' => 'Failure',
+                ]);
+            }
+
+            return $result;
+        }
+
+        return false;
+    }
+
     private function pathAudio(int $projectId, $external_id): string
     {
         return "beyond/{$projectId}/{$external_id}.mp3";
@@ -158,6 +212,26 @@ class BeyondService
         } while (count($loadContents) !== 0);
 
         return $contents;
+    }
+
+    public function loadContentByPostOrFail(int $projectId, int $postId)
+    {
+        $response = $this->client->get(
+            "https://api.beyondwords.io/v1/projects/{$projectId}/content", [
+            'form_params' => [
+                'filter' => [
+                    'source_id' => $postId,
+                ],
+            ]
+        ]);
+
+        $response = json_decode($response->getBody()->getContents(), true);
+
+        if (!isset($response[0])) {
+            throw new NotFoundHttpException('Content not found');
+        }
+
+        return $response[0];
     }
 
     /**
