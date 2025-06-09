@@ -15,7 +15,13 @@ class UrlCreateRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        $token = env('BEARER_TOKEN');
+
+        if (empty($token)) {
+            return false;
+        }
+
+        return $this->header('Authorization') === "Bearer $token";
     }
 
     /**

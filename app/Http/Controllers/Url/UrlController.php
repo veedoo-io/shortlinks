@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Url\UrlCreateRequest;
 use App\Models\Url\Link;
 use App\Service\Url\LinkService;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -41,6 +42,7 @@ class UrlController extends Controller
     /**
      * @param UrlCreateRequest $request
      * @return JsonResponse
+     * @throws AuthenticationException
      */
     public function create(UrlCreateRequest $request): JsonResponse
     {
