@@ -13,8 +13,8 @@ class ConvertToMp3Request extends FormRequest
     public function rules(): array
     {
         return [
-            'file' => ['file','mimetypes:application/octet-stream,audio/L24,audio/L16', 'max:30720'], // 30MB
-            'path' => ['required', 'string', 'min:1', 'max:255'],
+            'file' => ['required', 'file', 'mimetypes:application/octet-stream,audio/L24,audio/L16', 'max:30720'], // 30MB
+            'path' => ['required', 'string', 'min:1', 'max:255', 'ends_with:.mp3'],
         ];
     }
 
