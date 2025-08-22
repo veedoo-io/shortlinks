@@ -5,38 +5,56 @@ namespace App\Http\Controllers\Audio\Gemini;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Audio\Gemini\ConvertToMp3Request;
 
-use FFMpeg\Format\Audio\Mp3;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\Log;
-use ProtoneMedia\LaravelFFMpeg\Exporters\EncodingException;
-use ProtoneMedia\LaravelFFMpeg\Support\FFMpeg;
+use Illuminate\Support\Facades\Storage;
 
 class GeminiMp3Controller extends Controller
 {
+    public function index()
+    {
+        return "HELLO";
+    }
+    /**
+     * @throws AuthenticationException
+     */
     public function convertToMp3(ConvertToMp3Request $request)
     {
         try {
+            $token = env('BEARER_TOKEN');
+
+            if ($request->header('Authorization') !== "Bearer $token") {
+                throw new AuthenticationException();
+            }
+
             $fileGeminiPcm = $request->file('file');
+            $fileGeminiPcm->storeAs('audio/gemini', $fileGeminiPcm->getClientOriginalName(), ['disk' => 'public']);
 
-            $file = FFMpeg::open($fileGeminiPcm)
-                ->export()
-                ->inFormat(new Mp3())
-                ->getAudioStream()->all();
-            dd($file);
+            $name = explode('.', $fileGeminiPcm->getClientOriginalName());
+            $disk = Storage::disk('public');
+            $nameMp3 =  "$name[0].mp3";
 
-            return response()->stream(function() use ($file) {
-                fpassthru($file);
-            }, 200, [
-                'Content-Type' => 'audio/mpeg',
-                'Content-Disposition' => 'attachment; filename="converted.mp3"',
-            ]);
+            $realPathPcm = $disk->path("audio/gemini/{$fileGeminiPcm->getClientOriginalName()}");
+            $realPathMp3 = $disk->path($pathMp3 = "audio/gemini/{$nameMp3}");
 
-        } catch (EncodingException $exception) {
+            \exec("ffmpeg -f s16le -ar 24000 -ac 1 -i {$realPathPcm} {$realPathMp3}");
+
+            if ($disk->exists($pathMp3)) {
+                $disk->delete($realPathPcm);
+                return response()->download($realPathMp3, $nameMp3)->deleteFileAfterSend(true);
+            }
+
+            $disk->delete($realPathPcm);
+            return response()->json(['message' => 'Not Found File'], 404);
+
+
+        } catch (\Throwable $exception) {
             Log::error($exception->getMessage(), [
                 'fileName' => $request->file('file')->getClientOriginalName(),
-                'ErrorOutput' => $exception->getErrorOutput()
+                'ErrorOutput' => $exception->getFile()
             ]);
-            $command = $exception->getCommand();
-            $errorLog = $exception->getErrorOutput();
+
+            return response()->json(['message' => 'Not Convert to mp3', 'error' => $exception->getMessage()], 404);
         }
     }
 }
