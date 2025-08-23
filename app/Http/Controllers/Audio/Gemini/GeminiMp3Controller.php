@@ -8,7 +8,6 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use League\Flysystem\Visibility;
-use Symfony\Component\Process\Process;
 use Symfony\Component\HttpFoundation\Response;
 
 class GeminiMp3Controller extends Controller
@@ -23,6 +22,15 @@ class GeminiMp3Controller extends Controller
         if ($request->header('Authorization') !== "Bearer $token") {
             throw new AuthenticationException();
         }
+
+        $referrer = $request->headers->get('referer') ?? 'preprod.veedoo.dev';
+
+        if (str_contains($referrer, 'preprod.veedoo.dev')) {
+            $diskSpace = Storage::disk('s3-preprod');
+        } else {
+            $diskSpace = Storage::disk('s3');
+        }
+
 
         $fileGeminiPcm = $request->file('file');
         $fileName = $fileGeminiPcm->getFilename();
@@ -59,10 +67,9 @@ class GeminiMp3Controller extends Controller
                 return $this->sendError('MP3 file not generated', Response::HTTP_NOT_FOUND);
             }
 
-            Storage::disk('s3')->delete($request->path);
-
+            $diskSpace->delete($request->path);
             $stream = $disk->readStream($pathMp3);
-            $resultSave = Storage::disk('s3')->put($request->path, $stream, ['visibility' => Visibility::PUBLIC]);
+            $resultSave = $diskSpace->put($request->path, $stream, ['visibility' => Visibility::PUBLIC]);
 
             if (is_resource($stream)) {
                 fclose($stream);
@@ -74,7 +81,7 @@ class GeminiMp3Controller extends Controller
                 return $this->sendError('Failed to save MP3 file', Response::HTTP_NOT_FOUND);
             }
 
-            Storage::disk('s3')->setVisibility($request->path, Visibility::PUBLIC);
+            $diskSpace->setVisibility($request->path, Visibility::PUBLIC);
             return $this->sendResponse([], 'Converted to MP3 successfully');
 
         } catch (\Throwable $exception) {
