@@ -20,6 +20,12 @@ class ConvertToMp3Request extends FormRequest
 
     public function authorize(): bool
     {
+        $token = env('BEARER_TOKEN');
+
+        if ($this->header('Authorization') !== "Bearer $token") {
+            return false;
+        }
+
         return true;
     }
 }
