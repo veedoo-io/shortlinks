@@ -36,30 +36,30 @@ class GeminiMp3Controller extends Controller
         try {
             $fileGeminiPcm->storeAs('audio/gemini', $namePcm, ['disk' => 'local']);
 
-            $realPathPcm = $disk->path($pathPcm);
-            $realPathMp3 = $disk->path($pathMp3);
+            $realPathPcm = escapeshellarg($disk->path($pathPcm));
+            $realPathMp3 = escapeshellarg($disk->path($pathMp3));
 
-            $process = new Process([
-                'ffmpeg', '-f', 's16le', '-ar', '24000', '-ac', '1', '-i', $realPathPcm, '-y', $realPathMp3
-            ]);
-            $process->setTimeout(60);
-            $process->run();
+            $resultCommand = \exec(sprintf("ffmpeg -f s16le -ar 24000 -ac 1 -i %s %s", $realPathPcm, $realPathMp3), $output, $returnVar);
 
-            if (!$process->isSuccessful()) {
+            // is Not Successful command
+            if ($returnVar !== 0) {
                 $this->cleanup($disk, $pathPcm, $pathMp3);
 
                 Log::error('ffmpeg failed', [
-                    'exit_code' => $process->getExitCode(),
-                    'error_output' => $process->getErrorOutput(),
+                    'exit_code' => $returnVar,
+                    'error_output' => $output,
+                    'command' => $resultCommand,
                 ]);
 
-                return $this->sendError($process->getErrorOutput(), Response::HTTP_NOT_FOUND);
+                return $this->sendError(json_encode($output), Response::HTTP_NOT_FOUND);
             }
 
             if (!$disk->exists($pathMp3)) {
                 $this->cleanup($disk, $pathPcm, $pathMp3);
                 return $this->sendError('MP3 file not generated', Response::HTTP_NOT_FOUND);
             }
+
+            Storage::disk('s3')->delete($request->path);
 
             $stream = $disk->readStream($pathMp3);
             $resultSave = Storage::disk('s3')->put($request->path, $stream, ['visibility' => Visibility::PUBLIC]);
