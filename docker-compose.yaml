@@ -57,7 +57,7 @@ services:
     restart: unless-stopped
     user: postgres
     ports:
-      - "${DB_PORT:-5432}:5432"
+      - "${FORWARD_DB_PORT:-5432}:5432"
     environment:
       - POSTGRES_DB=${DB_DATABASE:-app}
       - POSTGRES_USER=${DB_USERNAME:-laravel}
