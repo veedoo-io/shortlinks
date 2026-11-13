@@ -1,5 +1,5 @@
 # Stage 1: Build environment and Composer dependencies
-FROM php:8.3-fpm AS builder
+FROM php:8.3.36-fpm AS builder
 
 # Install system dependencies and PHP extensions required for Laravel + MySQL/PostgreSQL support
 # Some dependencies are required for PHP extensions only in the build stage
@@ -53,11 +53,13 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 
 
 # Stage 2: Production environment
-FROM php:8.3-fpm AS production
+FROM php:8.3.36-fpm AS production
 
 # Install only runtime libraries needed in production
 # libfcgi-bin and procps are required for the php-fpm-healthcheck script
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# OS packages are upgraded so the image picks up Debian security fixes
+# released after the base image.
+RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
     libpq-dev \
     libicu-dev \
     libzip-dev \

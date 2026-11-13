@@ -10,7 +10,7 @@
 
 services:
   postgres:
-    image: postgres:16
+    image: postgres:16.16
     restart: unless-stopped
     user: postgres
     ports:
@@ -42,7 +42,7 @@ services:
           memory: 256M
 
   redis:
-    image: redis:alpine
+    image: redis:8.10.3-alpine
     restart: unless-stopped  # Automatically restart unless the service is explicitly stopped
     networks:
       - shortlink-internal

@@ -1,5 +1,5 @@
  Stage 1: Builder
-FROM php:8.3-fpm-alpine AS builder
+FROM php:8.3.36-fpm-alpine AS builder
 
 WORKDIR /var/www/html
 
@@ -32,7 +32,7 @@ RUN docker-php-ext-install \
     opcache
 
 # Install Composer
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Copy composer files
 COPY composer.json composer.lock ./
@@ -44,7 +44,7 @@ RUN composer install --no-dev --optimize-autoloader --no-progress --no-interacti
 COPY . .
 
 # Stage 2: Production
-FROM php:8.3-fpm-alpine AS production
+FROM php:8.3.36-fpm-alpine AS production
 
 WORKDIR /var/www/html
 
