@@ -1,5 +1,5 @@
 # Stage 1: Build assets
-FROM debian AS builder
+FROM debian:13 AS builder
 
 # Install Node.js and build tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -18,7 +18,10 @@ COPY . /var/www
 RUN npm install && npm run build
 
 # Stage 2: Nginx production image
-FROM nginx:alpine
+FROM nginx:1.30.6-alpine
+
+# Pick up Alpine security fixes released after the base image.
+RUN apk upgrade --no-cache
 
 # Copy custom Nginx configuration
 # -----------------------------------------------------------
