@@ -1,5 +1,5 @@
  Stage 1: Builder
-FROM php:8.3.36-fpm-alpine AS builder
+FROM php:8.3.37-fpm-alpine AS builder
 
 WORKDIR /var/www/html
 
@@ -44,7 +44,7 @@ RUN composer install --no-dev --optimize-autoloader --no-progress --no-interacti
 COPY . .
 
 # Stage 2: Production
-FROM php:8.3.36-fpm-alpine AS production
+FROM php:8.3.37-fpm-alpine AS production
 
 WORKDIR /var/www/html
 

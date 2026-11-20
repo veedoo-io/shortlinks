@@ -18,7 +18,7 @@ COPY . /var/www
 RUN npm install && npm run build
 
 # Stage 2: Nginx production image
-FROM nginx:1.30.6-alpine
+FROM nginx:1.30.7-alpine
 
 # Pick up Alpine security fixes released after the base image.
 RUN apk upgrade --no-cache
